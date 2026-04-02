@@ -1,32 +1,38 @@
 import os
 import google.generativeai as genai
-from dotenv import load_dotenv
 
-# Load local .env if it exists, otherwise use GitHub Secrets
-load_dotenv()
-
-# Setup API Key
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found. Check your GitHub Secrets.")
-
-genai.configure(api_key=api_key)
-
-# CORRECT MODEL NAME FORMAT
-model = genai.GenerativeModel('models/gemini-1.5-flash')
-
-def perform_research():
+def run_research():
+    # 1. Configuration - Pulls from GitHub Secrets
+    api_key = os.getenv("GEMINI_API_KEY")
+    
+    if not api_key:
+        print("Error: GEMINI_API_KEY is missing from GitHub Secrets.")
+        return
+    
+    # Configure the SDK
+    genai.configure(api_key=api_key)
+    
+    # 2. Model Setup
+    # Using 'models/' prefix is the fix for the 'Model Not Found' error
     try:
-        # Prompt for viral tech topics
-        prompt = "Identify 3 trending tech topics with high viral potential for a blog today."
+        model = genai.GenerativeModel('models/gemini-1.5-flash')
+        
+        # 3. Execution
+        prompt = "Identify 3 viral tech niches for a blog today. Provide a title and a 1-sentence summary for each."
         response = model.generate_content(prompt)
-        print("Research successful:")
+        
+        # Save results so your website/blog can find the content
+        with open("research_results.txt", "w") as f:
+            f.write(response.text)
+            
+        print("--- Research Results ---")
         print(response.text)
-        return response.text
+        print("------------------------")
+        print("Research completed and saved to research_results.txt")
+
     except Exception as e:
-        print(f"Error during research: {e}")
-        return None
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    perform_research()
+    run_research()
     
