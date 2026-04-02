@@ -1,73 +1,19 @@
-name: 🤖 AutoBusiness — Daily Template Empire
-
-on:
-  schedule:
-    - cron: '0 6 * * *'
-  workflow_dispatch:
-
-jobs:
-  run-autobusiness:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
-      - name: 🐍 Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: 📦 Install Dependencies
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          playwright install chromium
-          playwright install-deps chromium
 
-      - name: 🔍 AGENT 1 — Market Research
-        run: python 01_market_research.py
+      - name: Run Market Research
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: 🧠 AGENT 2 — Strategy
-        run: python 02_strategy.py
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: 👨‍💻 AGENT 3 — Generate Template
-        run: python 03_generate_template.py
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: 🎯 AGENT 4 — SEO & Copy
-        run: python 04_seo_copy.py
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: 📦 AGENT 5 — Package
-        run: python 05_package.py
-
-      - name: 🚀 AGENT 6 — Publish Gumroad
-        run: python 06_publish_gumroad.py
-        env:
-          GUMROAD_EMAIL: ${{ secrets.GUMROAD_EMAIL }}
-          GUMROAD_PASSWORD: ${{ secrets.GUMROAD_PASSWORD }}
-
-      - name: 📊 AGENT 7 — Self Improve
-        run: python 07_improve.py
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: 💾 Save & Commit Results
-        run: |
-          git config --global user.name "AutoBusiness Bot"
-          git config --global user.email "bot@autobusiness.ai"
-          git add knowledge/ logs/ outputs/
-          git diff --staged --quiet || git commit -m "🤖 Daily run $(date +'%Y-%m-%d')"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python market_research.py
+        
