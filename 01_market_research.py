@@ -1,21 +1,24 @@
-import google.generativeai as genai
 import os
+import google.generativeai as genai
 
-# Setup API Key from GitHub Secrets
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+# 1. Setup API Key
+# This pulls from the 'env' section of your GitHub Action
+api_key = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
 
-def generate_content(prompt):
-    try:
-        # Using the specific 'models/' prefix to resolve the 404 error
-        model = genai.GenerativeModel('models/gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        print(f"Error with primary model: {e}")
-        # Fallback to the stable 1.0 version if 1.5 is unrecognized
-        print("Attempting fallback to gemini-1.0-pro...")
-        model = genai.GenerativeModel('models/gemini-1.0-pro')
-        response = model.generate_content(prompt)
-        return response.text
+# 2. Initialize the model with the CORRECT string
+# Adding 'models/' before the name is the fix for the 404 error
+try:
+    model = genai.GenerativeModel('models/gemini-1.5-flash')
+except Exception as e:
+    print(f"Initialization error: {e}")
+    # Backup plan: use the Pro model if Flash is having issues
+    model = genai.GenerativeModel('models/gemini-1.0-pro')
 
-# Your existing logic below...
+# 3. Your generation function
+def run_research(topic):
+    prompt = f"Analyze the viral potential of: {topic}"
+    response = model.generate_content(prompt)
+    return response.text
+
+# Rest of your script logic...
